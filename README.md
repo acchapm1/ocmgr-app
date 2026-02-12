@@ -99,7 +99,7 @@ brew install ocmgr
 
 ### Build from source
 
-Requires Go 1.25+:
+Requires Go 1.22+:
 
 ```bash
 git clone https://github.com/acchapm1/ocmgr-app.git

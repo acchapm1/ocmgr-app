@@ -14,7 +14,12 @@ Detailed usage reference for **ocmgr**, the OpenCode Profile Manager. This guide
   - [`ocmgr profile show`](#ocmgr-profile-show)
   - [`ocmgr profile create`](#ocmgr-profile-create)
   - [`ocmgr profile delete`](#ocmgr-profile-delete)
+  - [`ocmgr profile import`](#ocmgr-profile-import)
+  - [`ocmgr profile export`](#ocmgr-profile-export)
   - [`ocmgr snapshot`](#ocmgr-snapshot)
+  - [`ocmgr sync push`](#ocmgr-sync-push)
+  - [`ocmgr sync pull`](#ocmgr-sync-pull)
+  - [`ocmgr sync status`](#ocmgr-sync-status)
   - [`ocmgr config show`](#ocmgr-config-show)
   - [`ocmgr config set`](#ocmgr-config-set)
   - [`ocmgr config init`](#ocmgr-config-init)
@@ -552,6 +557,141 @@ Error: profile "nonexistent" not found
 
 ---
 
+### `ocmgr profile import`
+
+Import a profile from a local directory or GitHub URL.
+
+#### Syntax
+
+```
+ocmgr profile import <source>
+```
+
+#### Arguments
+
+| Argument  | Required | Description                                          |
+|-----------|----------|------------------------------------------------------|
+| `source`  | Yes      | Local directory path or GitHub URL to import from    |
+
+#### Flags
+
+None.
+
+#### Behavior
+
+1. **Detects source type** — Checks if the source is a GitHub URL or local path.
+2. **GitHub URL handling** — If a GitHub URL is provided:
+   - Parses the URL to extract owner, repo, branch, and profile path
+   - Clones the repository to a temporary directory (shallow clone, depth 1)
+   - Extracts the profile from the specified path
+3. **Local path handling** — Resolves the path to an absolute path.
+4. **Validates profile** — Ensures the source contains a valid `profile.toml`.
+5. **Checks for conflicts** — Fails if a profile with the same name already exists.
+6. **Copies profile** — Recursively copies all files to the local store.
+
+#### GitHub URL Format
+
+```
+https://github.com/<owner>/<repo>/tree/<branch>/<path-to-profile>
+```
+
+For example:
+```
+https://github.com/user/opencode-profiles/tree/main/profiles/go
+```
+
+#### Examples
+
+**Import from a local directory:**
+
+```
+$ ocmgr profile import /path/to/my-profile
+✓ Imported profile "my-profile" to /home/user/.ocmgr/profiles/my-profile
+```
+
+**Import from GitHub:**
+
+```
+$ ocmgr profile import https://github.com/acchapm1/opencode-profiles/tree/main/profiles/go
+✓ Imported profile "go" to /home/user/.ocmgr/profiles/go
+```
+
+**Error: invalid GitHub URL:**
+
+```
+$ ocmgr profile import https://github.com/user/repo
+Error: cannot parse GitHub URL; expected format: https://github.com/<owner>/<repo>/tree/<branch>/<path>
+```
+
+**Error: profile already exists:**
+
+```
+$ ocmgr profile import /path/to/base
+Error: profile "base" already exists; delete it first with 'ocmgr profile delete base'
+```
+
+**Error: invalid profile directory:**
+
+```
+$ ocmgr profile import /empty/directory
+Error: profile.toml not found in /empty/directory
+```
+
+---
+
+### `ocmgr profile export`
+
+Export a profile to a local directory.
+
+#### Syntax
+
+```
+ocmgr profile export <name> <target-dir>
+```
+
+#### Arguments
+
+| Argument     | Required | Description                              |
+|--------------|----------|------------------------------------------|
+| `name`       | Yes      | Name of the profile to export            |
+| `target-dir` | Yes      | Directory to export the profile to       |
+
+#### Flags
+
+None.
+
+#### Behavior
+
+1. Loads the profile from the local store.
+2. Resolves the target directory to an absolute path.
+3. Creates a subdirectory with the profile name inside the target.
+4. Recursively copies all profile files.
+
+#### Examples
+
+**Export to a directory:**
+
+```
+$ ocmgr profile export go /tmp/backup
+✓ Exported profile "go" to /tmp/backup/go
+```
+
+**Export for sharing:**
+
+```
+$ ocmgr profile export my-team-profile ~/shared/profiles
+✓ Exported profile "my-team-profile" to /home/user/shared/profiles/my-team-profile
+```
+
+**Error: profile not found:**
+
+```
+$ ocmgr profile export nonexistent /tmp
+Error: profile "nonexistent" not found
+```
+
+---
+
 ### `ocmgr snapshot`
 
 Capture an existing `.opencode/` directory as a new profile.
@@ -634,6 +774,208 @@ Error: no .opencode directory found in /home/user/empty-dir
 ```
 $ ocmgr snapshot base .
 Error: profile "base" already exists; delete it first with 'ocmgr profile delete base' or choose a different name
+```
+
+---
+
+### `ocmgr sync push`
+
+Push a local profile to a GitHub repository.
+
+#### Syntax
+
+```
+ocmgr sync push <name>
+```
+
+#### Arguments
+
+| Argument | Required | Description                      |
+|----------|----------|----------------------------------|
+| `name`   | Yes      | Name of the profile to push      |
+
+#### Flags
+
+None.
+
+#### Behavior
+
+1. Loads the profile from the local store.
+2. Reads the GitHub repository and auth method from `~/.ocmgr/config.toml`.
+3. Clones the remote repository to a temporary directory.
+4. Copies the profile into the `profiles/` directory in the repo.
+5. Commits and pushes the changes.
+
+#### Prerequisites
+
+- Git must be installed and configured.
+- You must have write access to the configured GitHub repository.
+- The auth method must be properly configured (see [Configuration](#configuration)).
+
+#### Examples
+
+**Push a profile:**
+
+```
+$ ocmgr sync push go
+Pushing profile "go" to acchapm1/opencode-profiles …
+✓ Pushed profile "go"
+```
+
+**Error: profile not found:**
+
+```
+$ ocmgr sync push nonexistent
+Error: profile "nonexistent" not found
+```
+
+**Error: no GitHub configuration:**
+
+```
+$ ocmgr sync push go
+Error: loading config: github.repo is not configured
+```
+
+---
+
+### `ocmgr sync pull`
+
+Pull a profile from a GitHub repository.
+
+#### Syntax
+
+```
+ocmgr sync pull [name]
+```
+
+#### Arguments
+
+| Argument | Required | Description                              |
+|----------|----------|------------------------------------------|
+| `name`   | No*      | Name of the profile to pull              |
+
+*Required unless `--all` is specified.
+
+#### Flags
+
+| Flag   | Type | Default | Description                           |
+|--------|------|---------|---------------------------------------|
+| `--all`| bool | false   | Pull all profiles from the remote     |
+
+#### Behavior
+
+1. Reads the GitHub repository and auth method from `~/.ocmgr/config.toml`.
+2. Clones the remote repository to a temporary directory.
+3. **Single profile:** Copies the specified profile from `profiles/<name>/` to the local store.
+4. **All profiles:** Copies every profile from `profiles/` to the local store.
+
+#### Prerequisites
+
+- Git must be installed.
+- You must have read access to the configured GitHub repository.
+
+#### Examples
+
+**Pull a single profile:**
+
+```
+$ ocmgr sync pull go
+Pulling profile "go" from acchapm1/opencode-profiles …
+✓ Pulled profile "go"
+```
+
+**Pull all profiles:**
+
+```
+$ ocmgr sync pull --all
+Pulling all profiles from acchapm1/opencode-profiles …
+✓ Pulled 3 profiles:
+    base
+    go
+    python
+```
+
+**No profiles found:**
+
+```
+$ ocmgr sync pull --all
+Pulling all profiles from acchapm1/opencode-profiles …
+No profiles found in remote repository.
+```
+
+**Error: missing argument:**
+
+```
+$ ocmgr sync pull
+Error: provide a profile name or use --all
+```
+
+---
+
+### `ocmgr sync status`
+
+Show the sync status between local and remote profiles.
+
+#### Syntax
+
+```
+ocmgr sync status
+```
+
+#### Flags
+
+None.
+
+#### Behavior
+
+1. Reads the GitHub repository and auth method from `~/.ocmgr/config.toml`.
+2. Lists all local profiles in the store.
+3. Clones the remote repository to a temporary directory.
+4. Lists all remote profiles in `profiles/`.
+5. Compares local and remote profiles to determine status.
+
+#### Status Indicators
+
+| Status      | Description                                    |
+|-------------|------------------------------------------------|
+| ✓ in sync   | Profile exists locally and remotely, identical |
+| ~ modified  | Profile differs between local and remote       |
+| ● local only| Profile exists locally but not remotely        |
+| ○ remote only| Profile exists remotely but not locally       |
+
+#### Examples
+
+**Mixed status:**
+
+```
+$ ocmgr sync status
+Comparing local profiles with acchapm1/opencode-profiles …
+
+PROFILE    STATUS
+base       ✓ in sync
+go         ~ modified (push or pull to sync)
+my-custom  ● local only (push to sync)
+python     ○ remote only (pull to sync)
+```
+
+**All in sync:**
+
+```
+$ ocmgr sync status
+Comparing local profiles with acchapm1/opencode-profiles …
+
+PROFILE  STATUS
+base     ✓ in sync
+go       ✓ in sync
+```
+
+**No profiles:**
+
+```
+$ ocmgr sync status
+Comparing local profiles with acchapm1/opencode-profiles …
+
+No profiles found locally or remotely.
 ```
 
 ---
@@ -884,15 +1226,88 @@ $ ocmgr profile show my-custom
 $ ocmgr init -p my-custom .
 ```
 
-### Sharing Profiles (Coming in Phase 2)
+### Sharing Profiles via GitHub Sync
 
-GitHub sync is planned for a future release. This will allow:
+ocmgr can sync profiles with a GitHub repository, making it easy to share configurations across machines and with team members.
 
-- Pushing local profiles to a GitHub repository
-- Pulling profiles from a shared repository
-- Keeping profiles in sync across machines and team members
+#### Setup
 
-The `github.repo` and `github.auth` configuration keys are already in place for this feature. Stay tuned.
+1. Create a GitHub repository to store your profiles (e.g., `opencode-profiles`).
+2. Configure ocmgr to use it:
+
+```
+$ ocmgr config set github.repo your-username/opencode-profiles
+$ ocmgr config set github.auth gh
+```
+
+The repository should have a `profiles/` directory containing your profiles:
+
+```
+github.com/<user>/opencode-profiles/
+├── profiles/
+│   ├── base/
+│   │   ├── profile.toml
+│   │   ├── agents/
+│   │   └── ...
+│   ├── go/
+│   └── python/
+└── README.md
+```
+
+#### Push a Profile
+
+Upload a local profile to the remote repository:
+
+```
+$ ocmgr sync push my-custom
+Pushing profile "my-custom" to your-username/opencode-profiles …
+✓ Pushed profile "my-custom"
+```
+
+#### Pull a Profile
+
+Download a profile from the remote repository:
+
+```
+$ ocmgr sync pull go
+Pulling profile "go" from your-username/opencode-profiles …
+✓ Pulled profile "go"
+```
+
+Pull all remote profiles at once:
+
+```
+$ ocmgr sync pull --all
+Pulling all profiles from your-username/opencode-profiles …
+✓ Pulled 3 profiles:
+    base
+    go
+    python
+```
+
+#### Check Sync Status
+
+See which profiles are in sync, modified, or only exist locally/remote:
+
+```
+$ ocmgr sync status
+Comparing local profiles with your-username/opencode-profiles …
+
+PROFILE    STATUS
+base       ✓ in sync
+go         ~ modified (push or pull to sync)
+my-custom  ● local only (push to sync)
+python     ○ remote only (pull to sync)
+```
+
+#### Authentication Methods
+
+| Method | Description |
+|--------|-------------|
+| `gh` | Uses the GitHub CLI token (default, recommended) |
+| `env` | Reads `OCMGR_GITHUB_TOKEN` or `GITHUB_TOKEN` environment variable |
+| `ssh` | Uses SSH key authentication |
+| `token` | Reads from `~/.ocmgr/.token` file |
 
 ---
 
@@ -903,7 +1318,7 @@ The `github.repo` and `github.auth` configuration keys are already in place for 
 Global configuration file. Created by `ocmgr config init` or automatically with defaults on first use.
 
 ```toml
-# GitHub repository for remote profile sync (Phase 2).
+# GitHub repository for remote profile sync.
 # Format: "owner/repo"
 [github]
   repo = "acchapm1/opencode-profiles"
