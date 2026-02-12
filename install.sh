@@ -100,8 +100,15 @@ install_go_prompt() {
 }
 
 install_go() {
-    info "Installing Go..."
-    local go_version="1.23.6"
+    info "Detecting latest Go version..."
+    local go_version
+    go_version=$(curl -sSL "https://go.dev/VERSION?m=text" | head -1 | sed 's/^go//')
+    if [ -z "${go_version}" ]; then
+        error "Could not detect latest Go version from go.dev"
+        exit 1
+    fi
+    info "Latest Go: ${go_version}"
+
     local os arch
     os=$(echo "$PLATFORM" | cut -d_ -f1)
     arch=$(echo "$PLATFORM" | cut -d_ -f2)
