@@ -33,5 +33,5 @@ func init() {
 	// Persistent flags (none yet — structure ready for future additions).
 
 	// Subcommands
-	rootCmd.AddCommand(initCmd, profileCmd, snapshotCmd, configCmd)
+	rootCmd.AddCommand(initCmd, profileCmd, snapshotCmd, configCmd, syncCmd)
 }

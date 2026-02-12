@@ -43,6 +43,37 @@ Profiles are applied in order. Later profiles overlay earlier ones:
 ocmgr init --profile base --profile go --profile my-overrides .
 ```
 
+If a profile has `extends = "base"` in its `profile.toml`, the parent is automatically included — no need to list it explicitly.
+
+### Sync profiles with GitHub
+
+```bash
+# Push a profile to your remote repo
+ocmgr sync push go
+
+# Pull a profile from the remote
+ocmgr sync pull python
+
+# Pull everything
+ocmgr sync pull --all
+
+# See what's in sync and what's not
+ocmgr sync status
+```
+
+### Import and export profiles
+
+```bash
+# Import from a local directory
+ocmgr profile import /path/to/my-profile
+
+# Import from a GitHub URL
+ocmgr profile import https://github.com/user/profiles/tree/main/profiles/go
+
+# Export to a directory
+ocmgr profile export go /tmp/backup
+```
+
 ## Installation
 
 ### curl installer
@@ -59,13 +90,20 @@ The binary installs to `~/.local/bin` by default. Override with `INSTALL_DIR`:
 INSTALL_DIR=/usr/local/bin curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
 ```
 
+### Homebrew
+
+```bash
+brew tap acchapm1/ocmgr-app https://github.com/acchapm1/ocmgr-app
+brew install ocmgr
+```
+
 ### Build from source
 
 Requires Go 1.25+:
 
 ```bash
 git clone https://github.com/acchapm1/ocmgr-app.git
-cd ocmgr
+cd ocmgr-app
 make build
 # Binary at ./bin/ocmgr
 ```
@@ -79,16 +117,22 @@ make install
 ## Commands
 
 ```
-ocmgr                          Show help (TUI coming soon)
-ocmgr init [target-dir]        Initialize .opencode/ from profile(s)
-ocmgr profile list             List all local profiles
-ocmgr profile show <name>      Show profile details and file tree
-ocmgr profile create <name>    Scaffold an empty profile
-ocmgr profile delete <name>    Delete a profile (with confirmation)
-ocmgr snapshot <name> [dir]    Capture .opencode/ as a new profile
-ocmgr config show              Show current configuration
-ocmgr config set <key> <value> Set a config value
-ocmgr config init              Interactive first-run setup
+ocmgr                              Show help (TUI coming soon)
+ocmgr init [target-dir]            Initialize .opencode/ from profile(s)
+ocmgr profile list                 List all local profiles
+ocmgr profile show <name>          Show profile details and file tree
+ocmgr profile create <name>        Scaffold an empty profile
+ocmgr profile delete <name>        Delete a profile (with confirmation)
+ocmgr profile import <source>      Import a profile from dir or GitHub URL
+ocmgr profile export <name> <dir>  Export a profile to a directory
+ocmgr snapshot <name> [dir]        Capture .opencode/ as a new profile
+ocmgr sync push <name>             Push a profile to GitHub
+ocmgr sync pull <name>             Pull a profile from GitHub
+ocmgr sync pull --all              Pull all remote profiles
+ocmgr sync status                  Show local vs remote sync status
+ocmgr config show                  Show current configuration
+ocmgr config set <key> <value>     Set a config value
+ocmgr config init                  Interactive first-run setup
 ```
 
 ### `ocmgr init`
@@ -101,8 +145,10 @@ Copies one or more profiles into a project's `.opencode/` directory.
 | `--force` | `-f` | Overwrite all existing files without prompting |
 | `--merge` | `-m` | Only copy new files, skip existing ones |
 | `--dry-run` | `-d` | Preview what would be copied without writing |
+| `--only` | `-o` | Content dirs to include (comma-separated: agents,commands,skills,plugins) |
+| `--exclude` | `-e` | Content dirs to exclude (comma-separated: agents,commands,skills,plugins) |
 
-`--force` and `--merge` are mutually exclusive. When neither is set, ocmgr prompts per-file on conflicts:
+`--force` and `--merge` are mutually exclusive. `--only` and `--exclude` are mutually exclusive. When neither force nor merge is set, ocmgr prompts per-file on conflicts:
 
 ```
 Conflict: agents/code-reviewer.md
@@ -112,7 +158,40 @@ Choice:
 
 Choosing `c` shows a colored diff, then re-prompts for a decision.
 
+**Profile composition:** If a profile's `profile.toml` has `extends = "base"`, ocmgr automatically resolves the dependency chain and applies parent profiles first. Circular dependencies are detected and reported as errors.
+
+**Selective init:** Use `--only` to copy only specific content directories, or `--exclude` to skip them:
+
+```bash
+# Only copy agents and skills
+ocmgr init --profile go --only agents,skills .
+
+# Copy everything except plugins
+ocmgr init --profile go --exclude plugins .
+```
+
 If the profile contains plugins (`.ts` files), ocmgr detects them after copying and offers to run `bun install`.
+
+### `ocmgr sync`
+
+Synchronizes profiles between the local store and a remote GitHub repository. The repository and auth method are read from `~/.ocmgr/config.toml`.
+
+The remote repo uses a simple layout:
+
+```
+github.com/<user>/opencode-profiles/
+├── profiles/
+│   ├── base/
+│   ├── go/
+│   └── python/
+└── README.md
+```
+
+Auth methods:
+- **gh** — uses the `gh` CLI token (default, recommended)
+- **env** — reads `OCMGR_GITHUB_TOKEN` or `GITHUB_TOKEN`
+- **ssh** — uses SSH key authentication
+- **token** — reads from `~/.ocmgr/.token`
 
 ## Configuration
 
@@ -120,7 +199,7 @@ Config lives at `~/.ocmgr/config.toml`. Run `ocmgr config init` for interactive 
 
 ```toml
 [github]
-repo = "acchapm1/opencode-profiles"    # GitHub owner/repo for sync (Phase 2)
+repo = "acchapm1/opencode-profiles"    # GitHub owner/repo for sync
 auth = "gh"                            # gh, env, ssh, token
 
 [defaults]
@@ -168,7 +247,7 @@ description = "Go development profile with Go-specific agents and tooling"
 version = "1.0.0"
 author = "acchapm1"
 tags = ["go", "golang", "backend"]
-extends = "base"    # Optional: parent profile (composition in Phase 2)
+extends = "base"    # Optional: parent profile resolved at init time
 ```
 
 | Field | Required | Description |
@@ -183,21 +262,25 @@ extends = "base"    # Optional: parent profile (composition in Phase 2)
 ## Project Structure
 
 ```
-ocmgr/
+ocmgr-app/
 ├── cmd/ocmgr/main.go          # Entry point
 ├── internal/
 │   ├── cli/                    # Cobra command definitions
 │   │   ├── root.go             # Root command, subcommand registration
-│   │   ├── init.go             # ocmgr init
-│   │   ├── profile.go          # ocmgr profile {list,show,create,delete}
+│   │   ├── init.go             # ocmgr init (with extends + selective)
+│   │   ├── profile.go          # ocmgr profile {list,show,create,delete,import,export}
 │   │   ├── snapshot.go         # ocmgr snapshot
+│   │   ├── sync.go             # ocmgr sync {push,pull,status}
 │   │   └── config.go           # ocmgr config {show,set,init}
 │   ├── config/                 # Config loading/saving (~/.ocmgr/config.toml)
 │   ├── profile/                # Profile data model, validation, scaffolding
 │   ├── store/                  # Local store (~/.ocmgr/profiles) management
-│   └── copier/                 # File copy, merge, conflict resolution
+│   ├── copier/                 # File copy, merge, conflict resolution
+│   ├── resolver/               # Profile extends dependency chain resolution
+│   └── github/                 # GitHub sync (auth, clone, push, pull, status)
+├── Formula/ocmgr.rb            # Homebrew formula
 ├── install.sh                  # curl-friendly installer
-├── Makefile                    # build, install, test, lint, clean
+├── Makefile                    # build, install, test, lint, clean, dist
 └── go.mod
 ```
 
@@ -213,8 +296,8 @@ ocmgr/
 **Phase 1 -- CLI (complete)**
 Core profile management: init, profile CRUD, snapshot, config, installer.
 
-**Phase 2 -- GitHub Sync (planned)**
-`ocmgr sync push/pull` to sync profiles with a GitHub repo. Profile inheritance via `extends`. Selective init (`--only agents`, `--exclude plugins`). Homebrew tap and AUR package.
+**Phase 2 -- GitHub Sync & Composition (complete)**
+`ocmgr sync push/pull/status` to sync profiles with a GitHub repo. Profile inheritance via `extends`. Selective init (`--only`, `--exclude`). Profile import/export. Homebrew formula.
 
 **Phase 3 -- Interactive TUI (planned)**
 `ocmgr` with no arguments launches a full TUI built with [Charmbracelet](https://charm.sh) (Bubble Tea, Huh, Lip Gloss). Profile browser, init wizard, diff viewer, and snapshot wizard.

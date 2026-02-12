@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/acchapm1/ocmgr-app/internal/copier"
+	"github.com/acchapm1/ocmgr-app/internal/resolver"
 	"github.com/acchapm1/ocmgr-app/internal/store"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +22,14 @@ contents into the target directory. If no target directory is
 specified, the current working directory is used.
 
 Multiple profiles can be layered by passing --profile more than once;
-they are applied in order so later profiles override earlier ones.`,
+they are applied in order so later profiles override earlier ones.
+
+If a profile has an "extends" field in its profile.toml, the parent
+profile is automatically included before the child. Circular
+dependencies are detected and reported as errors.
+
+Use --only or --exclude to limit which content directories are copied
+(agents, commands, skills, plugins).`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runInit,
 }
@@ -31,6 +39,8 @@ func init() {
 	initCmd.Flags().BoolP("force", "f", false, "overwrite existing files without prompting")
 	initCmd.Flags().BoolP("merge", "m", false, "only copy new files, skip existing ones")
 	initCmd.Flags().BoolP("dry-run", "d", false, "preview changes without copying")
+	initCmd.Flags().StringP("only", "o", "", "content dirs to include (comma-separated: agents,commands,skills,plugins)")
+	initCmd.Flags().StringP("exclude", "e", "", "content dirs to exclude (comma-separated: agents,commands,skills,plugins)")
 	_ = initCmd.MarkFlagRequired("profile")
 }
 
@@ -39,10 +49,25 @@ func runInit(cmd *cobra.Command, args []string) error {
 	force, _ := cmd.Flags().GetBool("force")
 	merge, _ := cmd.Flags().GetBool("merge")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	onlyRaw, _ := cmd.Flags().GetString("only")
+	excludeRaw, _ := cmd.Flags().GetString("exclude")
 
 	// Validate mutually exclusive flags.
 	if force && merge {
 		return fmt.Errorf("--force and --merge are mutually exclusive")
+	}
+	if onlyRaw != "" && excludeRaw != "" {
+		return fmt.Errorf("--only and --exclude are mutually exclusive")
+	}
+
+	// Parse and validate --only / --exclude values.
+	includeDirs, err := parseContentDirs(onlyRaw)
+	if err != nil {
+		return fmt.Errorf("--only: %w", err)
+	}
+	excludeDirs, err := parseContentDirs(excludeRaw)
+	if err != nil {
+		return fmt.Errorf("--exclude: %w", err)
 	}
 
 	// Resolve target directory.
@@ -62,13 +87,33 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("cannot open store: %w", err)
 	}
 
-	// Load every requested profile up-front so we fail fast.
+	// Resolve the extends dependency chain for all requested profiles.
+	// This expands "go" (extends "base") into ["base", "go"] so parents
+	// are applied first.
+	resolved, err := resolver.Resolve(profileNames, func(name string) (string, error) {
+		p, err := s.Get(name)
+		if err != nil {
+			return "", err
+		}
+		return p.Extends, nil
+	})
+	if err != nil {
+		return fmt.Errorf("resolving profile dependencies: %w", err)
+	}
+
+	// If the resolved list differs from what the user requested, show
+	// the full chain so the user knows what will be applied.
+	if len(resolved) != len(profileNames) || !slicesEqual(resolved, profileNames) {
+		fmt.Printf("Resolved dependency chain: %s\n", strings.Join(resolved, " → "))
+	}
+
+	// Load every resolved profile up-front so we fail fast.
 	type loadedProfile struct {
 		name string
 		path string
 	}
-	profiles := make([]loadedProfile, 0, len(profileNames))
-	for _, name := range profileNames {
+	profiles := make([]loadedProfile, 0, len(resolved))
+	for _, name := range resolved {
 		p, err := s.Get(name)
 		if err != nil {
 			return fmt.Errorf("profile %q: %w", name, err)
@@ -89,8 +134,10 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// Build copy options.
 	opts := copier.Options{
-		Strategy: strategy,
-		DryRun:   dryRun,
+		Strategy:    strategy,
+		DryRun:      dryRun,
+		IncludeDirs: includeDirs,
+		ExcludeDirs: excludeDirs,
 		OnConflict: func(src, dst string) (copier.ConflictChoice, error) {
 			relPath, _ := filepath.Rel(targetOpencode, dst)
 			fmt.Fprintf(os.Stderr, "Conflict: %s\n", relPath)
@@ -191,4 +238,41 @@ func runInit(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// parseContentDirs splits a comma-separated string of content directory
+// names, validates each one, and returns the list. An empty input returns
+// nil.
+func parseContentDirs(raw string) ([]string, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, nil
+	}
+
+	var dirs []string
+	for _, part := range strings.Split(raw, ",") {
+		d := strings.TrimSpace(part)
+		if d == "" {
+			continue
+		}
+		if !copier.ValidContentDirs[d] {
+			return nil, fmt.Errorf("invalid content directory %q; must be one of: agents, commands, skills, plugins", d)
+		}
+		dirs = append(dirs, d)
+	}
+	return dirs, nil
+}
+
+// slicesEqual reports whether two string slices have the same elements
+// in the same order.
+func slicesEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }

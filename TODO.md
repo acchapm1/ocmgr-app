@@ -81,7 +81,7 @@ A CLI (and eventually TUI) tool written in Go that manages `.opencode` directory
 > Goal: Profiles sync to/from GitHub. Profile inheritance works. Selective init. Distribution via Brew/AUR.
 
 ### 2.1 — GitHub Sync
-- [ ] Single repo layout for all profiles:
+- [x] Single repo layout for all profiles:
   ```
   github.com/<user>/opencode-profiles/
   ├── profiles/
@@ -90,36 +90,36 @@ A CLI (and eventually TUI) tool written in Go that manages `.opencode` directory
   │   └── ...
   └── README.md
   ```
-- [ ] `ocmgr sync push <name>` — push local profile to GitHub repo
-- [ ] `ocmgr sync pull <name>` — pull profile from GitHub to local
-- [ ] `ocmgr sync pull --all` — pull all remote profiles
-- [ ] `ocmgr sync status` — show local vs remote diff
-- [ ] Support both public and private repos
-- [ ] Multiple auth methods:
+- [x] `ocmgr sync push <name>` — push local profile to GitHub repo
+- [x] `ocmgr sync pull <name>` — pull profile from GitHub to local
+- [x] `ocmgr sync pull --all` — pull all remote profiles
+- [x] `ocmgr sync status` — show local vs remote diff
+- [x] Support both public and private repos
+- [x] Multiple auth methods:
   - `gh` CLI token (auto-detect)
   - `GITHUB_TOKEN` / `OCMGR_GITHUB_TOKEN` env var
   - SSH key
-  - Interactive token prompt on first use
-- [ ] Conflict resolution: prompt on diverged files
+  - Token file (`~/.ocmgr/.token`)
+- [x] Sync cache at `~/.ocmgr/.sync-cache/` using git CLI
 
 ### 2.2 — Profile Composition & Layering
-- [ ] "base" profiles that others extend via `extends` in `profile.toml`
-- [ ] `ocmgr init` resolves dependency chain (e.g., `go` → `base`)
-- [ ] Merge strategies: overlay (default), skip-existing, prompt-per-file
-- [ ] Circular dependency detection
+- [x] "base" profiles that others extend via `extends` in `profile.toml`
+- [x] `ocmgr init` resolves dependency chain (e.g., `go` → `base`)
+- [x] Merge strategies: overlay (default), skip-existing, prompt-per-file
+- [x] Circular dependency detection
 
 ### 2.3 — Selective Init
-- [ ] `ocmgr init --profile go --only agents,skills .`
-- [ ] `ocmgr init --profile go --exclude plugins .`
+- [x] `ocmgr init --profile go --only agents,skills .`
+- [x] `ocmgr init --profile go --exclude plugins .`
 
 ### 2.4 — Additional Distribution
-- [ ] Homebrew tap
+- [x] Homebrew formula (`Formula/ocmgr.rb`)
 - [ ] AUR package (yay)
-- [ ] `goreleaser` config for cross-platform builds
+- [x] GitHub Actions release pipeline (`.github/workflows/release.yml`)
 
 ### 2.5 — Profile Import/Export
-- [ ] `ocmgr profile import <path|url>` — import from directory or GitHub URL
-- [ ] `ocmgr profile export <name> <path>` — export to directory
+- [x] `ocmgr profile import <path|url>` — import from directory or GitHub URL
+- [x] `ocmgr profile export <name> <path>` — export to directory
 
 ---
 

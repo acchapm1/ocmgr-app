@@ -60,6 +60,14 @@ type Options struct {
 	// return a ConflictChoice. If OnConflict is nil and the strategy is
 	// StrategyPrompt, conflicting files are skipped.
 	OnConflict func(src, dst string) (ConflictChoice, error)
+	// IncludeDirs, when non-empty, restricts copying to only the listed
+	// content directories (e.g. ["agents", "skills"]).  It is mutually
+	// exclusive with ExcludeDirs.
+	IncludeDirs []string
+	// ExcludeDirs, when non-empty, skips the listed content directories
+	// during copying (e.g. ["plugins"]).  It is mutually exclusive with
+	// IncludeDirs.
+	ExcludeDirs []string
 }
 
 // Result summarises the outcome of a CopyProfile invocation.
@@ -100,6 +108,10 @@ func CopyProfile(profileDir, targetDir string, opts Options) (*Result, error) {
 		opts.Strategy = StrategyOverwrite
 	}
 
+	// Build lookup sets for include/exclude filtering.
+	includeSet := toSet(opts.IncludeDirs)
+	excludeSet := toSet(opts.ExcludeDirs)
+
 	result := &Result{}
 
 	err := filepath.WalkDir(profileDir, func(path string, d fs.DirEntry, walkErr error) error {
@@ -130,6 +142,20 @@ func CopyProfile(profileDir, targetDir string, opts Options) (*Result, error) {
 				return filepath.SkipDir
 			}
 			return nil // skip loose files like profile.toml
+		}
+
+		// Apply --only / --exclude filtering.
+		if len(includeSet) > 0 && !includeSet[topLevel] {
+			if d.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if len(excludeSet) > 0 && excludeSet[topLevel] {
+			if d.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
 		}
 
 		// Nothing to copy for directories themselves; they are created
@@ -323,6 +349,27 @@ func FilesEqual(a, b string) (bool, error) {
 			return false, errB
 		}
 	}
+}
+
+// ValidContentDirs is the set of recognised content directory names that may
+// be passed to IncludeDirs or ExcludeDirs.
+var ValidContentDirs = map[string]bool{
+	"agents":   true,
+	"commands": true,
+	"skills":   true,
+	"plugins":  true,
+}
+
+// toSet converts a string slice into a lookup map.
+func toSet(items []string) map[string]bool {
+	if len(items) == 0 {
+		return nil
+	}
+	m := make(map[string]bool, len(items))
+	for _, v := range items {
+		m[v] = true
+	}
+	return m
 }
 
 // DetectPluginDeps checks whether targetDir contains any .ts files under a

@@ -4,9 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/acchapm1/ocmgr-app/internal/github"
 	"github.com/acchapm1/ocmgr-app/internal/profile"
 	"github.com/acchapm1/ocmgr-app/internal/store"
 	"github.com/spf13/cobra"
@@ -183,6 +186,146 @@ var profileDeleteCmd = &cobra.Command{
 	},
 }
 
+// ── profile import ────────────────────────────────────────────────
+
+var profileImportCmd = &cobra.Command{
+	Use:   "import <source>",
+	Short: "Import a profile from a local directory or GitHub URL",
+	Long: `Import a profile into the local store.
+
+The source can be:
+  - A local directory containing a valid profile.toml
+  - A GitHub URL (https://github.com/<owner>/<repo>/tree/<branch>/profiles/<name>)
+
+Examples:
+  ocmgr profile import /path/to/my-profile
+  ocmgr profile import https://github.com/user/opencode-profiles/tree/main/profiles/go`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		source := args[0]
+
+		s, err := store.NewStore()
+		if err != nil {
+			return fmt.Errorf("opening store: %w", err)
+		}
+
+		var srcDir string
+		var tmpDir string
+
+		if isGitHubURL(source) {
+			// Parse the URL and clone the repo to extract the profile.
+			repo, branch, profilePath, err := parseGitHubProfileURL(source)
+			if err != nil {
+				return err
+			}
+
+			tmpDir, err = os.MkdirTemp("", "ocmgr-import-*")
+			if err != nil {
+				return fmt.Errorf("creating temp dir: %w", err)
+			}
+			defer os.RemoveAll(tmpDir)
+
+			cloneURL := fmt.Sprintf("https://github.com/%s.git", repo)
+			cloneCmd := exec.Command("git", "clone", "--depth", "1", "--branch", branch, cloneURL, tmpDir)
+			cloneCmd.Stderr = os.Stderr
+			if err := cloneCmd.Run(); err != nil {
+				return fmt.Errorf("cloning %s: %w", repo, err)
+			}
+
+			srcDir = filepath.Join(tmpDir, profilePath)
+		} else {
+			// Local directory.
+			abs, err := filepath.Abs(source)
+			if err != nil {
+				return fmt.Errorf("resolving path: %w", err)
+			}
+			srcDir = abs
+		}
+
+		// Validate the source is a proper profile.
+		p, err := github.ValidateProfileDir(srcDir)
+		if err != nil {
+			return err
+		}
+
+		if s.Exists(p.Name) {
+			return fmt.Errorf("profile %q already exists; delete it first with 'ocmgr profile delete %s'", p.Name, p.Name)
+		}
+
+		// Copy the profile into the store.
+		targetDir := filepath.Join(s.Dir, p.Name)
+		if err := github.CopyDirRecursive(srcDir, targetDir); err != nil {
+			return fmt.Errorf("importing profile: %w", err)
+		}
+
+		fmt.Printf("✓ Imported profile %q to %s\n", p.Name, targetDir)
+		return nil
+	},
+}
+
+// ── profile export ────────────────────────────────────────────────
+
+var profileExportCmd = &cobra.Command{
+	Use:   "export <name> <target-dir>",
+	Short: "Export a profile to a local directory",
+	Args:  cobra.ExactArgs(2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		name := args[0]
+		targetDir := args[1]
+
+		s, err := store.NewStore()
+		if err != nil {
+			return fmt.Errorf("opening store: %w", err)
+		}
+
+		p, err := s.Get(name)
+		if err != nil {
+			return err
+		}
+
+		abs, err := filepath.Abs(targetDir)
+		if err != nil {
+			return fmt.Errorf("resolving target: %w", err)
+		}
+
+		dst := filepath.Join(abs, name)
+		if err := github.CopyDirRecursive(p.Path, dst); err != nil {
+			return fmt.Errorf("exporting profile: %w", err)
+		}
+
+		fmt.Printf("✓ Exported profile %q to %s\n", name, dst)
+		return nil
+	},
+}
+
+// ── helpers ───────────────────────────────────────────────────────
+
+// isGitHubURL checks if a string looks like a GitHub URL.
+func isGitHubURL(s string) bool {
+	return strings.HasPrefix(s, "https://github.com/") ||
+		strings.HasPrefix(s, "http://github.com/")
+}
+
+// parseGitHubProfileURL extracts repo, branch and path from a URL like
+// https://github.com/user/repo/tree/main/profiles/go
+func parseGitHubProfileURL(url string) (repo, branch, profilePath string, err error) {
+	// Strip protocol prefix.
+	url = strings.TrimPrefix(url, "https://github.com/")
+	url = strings.TrimPrefix(url, "http://github.com/")
+	url = strings.TrimSuffix(url, "/")
+
+	// Expected format: <owner>/<repo>/tree/<branch>/<path...>
+	parts := strings.SplitN(url, "/", 5)
+	if len(parts) < 5 || parts[2] != "tree" {
+		return "", "", "", fmt.Errorf("cannot parse GitHub URL; expected format: https://github.com/<owner>/<repo>/tree/<branch>/<path>")
+	}
+
+	repo = parts[0] + "/" + parts[1]
+	branch = parts[3]
+	profilePath = parts[4]
+	return repo, branch, profilePath, nil
+}
+
 func init() {
 	profileDeleteCmd.Flags().BoolP("force", "f", false, "skip confirmation prompt")
 
@@ -190,4 +333,6 @@ func init() {
 	profileCmd.AddCommand(profileShowCmd)
 	profileCmd.AddCommand(profileCreateCmd)
 	profileCmd.AddCommand(profileDeleteCmd)
+	profileCmd.AddCommand(profileImportCmd)
+	profileCmd.AddCommand(profileExportCmd)
 }
