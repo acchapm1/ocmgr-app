@@ -8,7 +8,7 @@
 
 ```bash
 # Install
-curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
 
 # First-time setup
 ocmgr config init
@@ -50,13 +50,13 @@ ocmgr init --profile base --profile go --profile my-overrides .
 Tries a pre-built binary first, falls back to building from source. Detects OS/arch and checks for Go automatically:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
 ```
 
 The binary installs to `~/.local/bin` by default. Override with `INSTALL_DIR`:
 
 ```bash
-INSTALL_DIR=/usr/local/bin curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
+INSTALL_DIR=/usr/local/bin curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
 ```
 
 ### Build from source
@@ -64,7 +64,7 @@ INSTALL_DIR=/usr/local/bin curl -sSL https://raw.githubusercontent.com/acchapm1/
 Requires Go 1.25+:
 
 ```bash
-git clone https://github.com/acchapm1/ocmgr.git
+git clone https://github.com/acchapm1/ocmgr-app.git
 cd ocmgr
 make build
 # Binary at ./bin/ocmgr

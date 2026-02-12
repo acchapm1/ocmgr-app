@@ -1,4 +1,4 @@
-module github.com/acchapm1/ocmgr
+module github.com/acchapm1/ocmgr-app
 
 go 1.25.7
 

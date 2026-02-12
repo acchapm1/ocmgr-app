@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
 # ocmgr installer
-# Usage: curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
+# Usage: curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
 #
 set -euo pipefail
 
-REPO="acchapm1/ocmgr"
+REPO="acchapm1/ocmgr-app"
 BINARY="ocmgr"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 
@@ -190,16 +190,16 @@ install_from_source() {
     tmpdir=$(mktemp -d)
 
     info "Cloning ${REPO}..."
-    git clone --depth 1 "https://github.com/${REPO}.git" "${tmpdir}/ocmgr" 2>/dev/null
+    git clone --depth 1 "https://github.com/${REPO}.git" "${tmpdir}/${BINARY}" 2>/dev/null
 
     info "Building..."
     (
-        cd "${tmpdir}/ocmgr"
+        cd "${tmpdir}/${BINARY}"
         go build -ldflags "-s -w" -o "${BINARY}" ./cmd/ocmgr
     )
 
     mkdir -p "${INSTALL_DIR}"
-    cp "${tmpdir}/ocmgr/${BINARY}" "${INSTALL_DIR}/${BINARY}"
+    cp "${tmpdir}/${BINARY}/${BINARY}" "${INSTALL_DIR}/${BINARY}"
     chmod +x "${INSTALL_DIR}/${BINARY}"
     rm -rf "${tmpdir}"
 
@@ -220,9 +220,22 @@ elif [ -x "${INSTALL_DIR}/${BINARY}" ]; then
     echo ""
     if [[ ":$PATH:" != *":${INSTALL_DIR}:"* ]]; then
         warn "${INSTALL_DIR} is not in your PATH."
-        echo "  Add it to your shell profile:"
+
+        # Detect the user's shell and suggest the right config file.
+        shell_name=$(basename "${SHELL:-/bin/bash}")
+        case "${shell_name}" in
+            zsh)  shell_rc="~/.zshrc" ;;
+            fish) shell_rc="~/.config/fish/config.fish" ;;
+            *)    shell_rc="~/.bashrc" ;;
+        esac
+
+        echo "  Add this to ${shell_rc}:"
         echo ""
-        echo "    export PATH=\"${INSTALL_DIR}:\$PATH\""
+        if [ "${shell_name}" = "fish" ]; then
+            echo "    fish_add_path ${INSTALL_DIR}"
+        else
+            echo "    export PATH=\"${INSTALL_DIR}:\$PATH\""
+        fi
         echo ""
     fi
     echo "  Run '${INSTALL_DIR}/${BINARY} --help' to get started."
