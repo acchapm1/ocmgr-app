@@ -1,5 +1,5 @@
 BINARY_NAME := ocmgr
-MODULE := github.com/acchapm1/ocmgr-app
+MODULE := github.com/acchapm1/ocmgr
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 LDFLAGS := -ldflags "-s -w -X $(MODULE)/internal/cli.Version=$(VERSION)"
 GO := $(shell command -v go 2>/dev/null || echo "go")

@@ -12,7 +12,7 @@ A CLI (and eventually TUI) tool written in Go that manages `.opencode` directory
 
 ### 1.0 — Bootstrap
 - [x] Create `install.sh` — detects Go, offers to install or prints instructions and exits
-- [x] Initialize Go module (`github.com/acchapm1/ocmgr-app`)
+- [x] Initialize Go module (`github.com/acchapm1/ocmgr`)
 - [x] Set up project directory structure
 - [x] Add `.gitignore`, `Makefile`
 - [ ] Initialize git repo
@@ -72,7 +72,7 @@ A CLI (and eventually TUI) tool written in Go that manages `.opencode` directory
   - Build from source or download pre-built binary
   - Install to `~/.local/bin` or `/usr/local/bin`
 - [ ] GitHub Releases with pre-built binaries (via `goreleaser` or Makefile)
-- [x] Usage: `curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash`
+- [x] Usage: `curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash`
 
 ---
 

@@ -335,7 +335,7 @@ Same logic as plugins:
 │       └── ...
 └── config.toml
 
-ocmgr-app/
+ocmgr/
 ├── internal/
 │   ├── cli/
 │   │   └── init.go              # Add MCP prompt logic

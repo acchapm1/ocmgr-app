@@ -9,9 +9,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/acchapm1/ocmgr-app/internal/github"
-	"github.com/acchapm1/ocmgr-app/internal/profile"
-	"github.com/acchapm1/ocmgr-app/internal/store"
+	"github.com/acchapm1/ocmgr/internal/github"
+	"github.com/acchapm1/ocmgr/internal/profile"
+	"github.com/acchapm1/ocmgr/internal/store"
 	"github.com/spf13/cobra"
 )
 

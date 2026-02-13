@@ -226,7 +226,7 @@ If `opencode.json` already exists in target:
 │       └── plugins/          # Plugin source files (unchanged)
 └── config.toml
 
-ocmgr-app/
+ocmgr/
 ├── internal/
 │   ├── cli/
 │   │   └── init.go           # Add plugin prompt logic

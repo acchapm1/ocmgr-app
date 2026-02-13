@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
 # ocmgr installer
-# Usage: curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
+# Usage: curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
 #
 set -euo pipefail
 
-REPO="acchapm1/ocmgr-app"
+REPO="acchapm1/ocmgr"
 BINARY="ocmgr"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 

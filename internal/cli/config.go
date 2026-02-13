@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/acchapm1/ocmgr-app/internal/config"
+	"github.com/acchapm1/ocmgr/internal/config"
 	"github.com/spf13/cobra"
 )
 

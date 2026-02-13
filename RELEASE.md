@@ -7,7 +7,7 @@ You tag a commit  →  Pipeline triggers  →  Binaries built  →  Release publ
     (v1.0.0)         (GitHub Actions)      (6 platforms)      (download page)
 ```
 
-A **release** is a GitHub page tied to a **git tag** where you can attach downloadable files (your binaries). Users see it at `github.com/acchapm1/ocmgr-app/releases`.
+A **release** is a GitHub page tied to a **git tag** where you can attach downloadable files (your binaries). Users see it at `github.com/acchapm1/ocmgr/releases`.
 
 ### Automated Release (Recommended)
 
@@ -75,42 +75,42 @@ cd release/v0.1.0
 
 **Linux AMD64:**
 ```bash
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr-app/internal/cli.Version=v0.1.0" -o ocmgr ../../cmd/ocmgr
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr/internal/cli.Version=v0.1.0" -o ocmgr ../../cmd/ocmgr
 tar -czvf ocmgr_v0.1.0_linux_amd64.tar.gz ocmgr
 rm ocmgr
 ```
 
 **Linux ARM64:**
 ```bash
-GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr-app/internal/cli.Version=v0.1.0" -o ocmgr ../../cmd/ocmgr
+GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr/internal/cli.Version=v0.1.0" -o ocmgr ../../cmd/ocmgr
 tar -czvf ocmgr_v0.1.0_linux_arm64.tar.gz ocmgr
 rm ocmgr
 ```
 
 **macOS AMD64 (Intel):**
 ```bash
-GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr-app/internal/cli.Version=v0.1.0" -o ocmgr ../../cmd/ocmgr
+GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr/internal/cli.Version=v0.1.0" -o ocmgr ../../cmd/ocmgr
 tar -czvf ocmgr_v0.1.0_darwin_amd64.tar.gz ocmgr
 rm ocmgr
 ```
 
 **macOS ARM64 (Apple Silicon):**
 ```bash
-GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr-app/internal/cli.Version=v0.1.0" -o ocmgr ../../cmd/ocmgr
+GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr/internal/cli.Version=v0.1.0" -o ocmgr ../../cmd/ocmgr
 tar -czvf ocmgr_v0.1.0_darwin_arm64.tar.gz ocmgr
 rm ocmgr
 ```
 
 **Windows AMD64:**
 ```bash
-GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr-app/internal/cli.Version=v0.1.0" -o ocmgr.exe ../../cmd/ocmgr
+GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr/internal/cli.Version=v0.1.0" -o ocmgr.exe ../../cmd/ocmgr
 tar -czvf ocmgr_v0.1.0_windows_amd64.tar.gz ocmgr.exe
 rm ocmgr.exe
 ```
 
 **Windows ARM64:**
 ```bash
-GOOS=windows GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr-app/internal/cli.Version=v0.1.0" -o ocmgr.exe ../../cmd/ocmgr
+GOOS=windows GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/acchapm1/ocmgr/internal/cli.Version=v0.1.0" -o ocmgr.exe ../../cmd/ocmgr
 tar -czvf ocmgr_v0.1.0_windows_arm64.tar.gz ocmgr.exe
 rm ocmgr.exe
 ```
@@ -153,12 +153,12 @@ gh release create v0.1.0 \
 
 **macOS/Linux (curl):**
 \`\`\`bash
-curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
 \`\`\`
 
 **From Source:**
 \`\`\`bash
-go install github.com/acchapm1/ocmgr-app/cmd/ocmgr@v0.1.0
+go install github.com/acchapm1/ocmgr/cmd/ocmgr@v0.1.0
 \`\`\`
 
 ### Features
@@ -185,19 +185,19 @@ go install github.com/acchapm1/ocmgr-app/cmd/ocmgr@v0.1.0
 
 ### What's Changed
 
-See [CHANGELOG.md](https://github.com/acchapm1/ocmgr-app/blob/main/CHANGELOG.md) for details." \
+See [CHANGELOG.md](https://github.com/acchapm1/ocmgr/blob/main/CHANGELOG.md) for details." \
   release/v0.1.0/*.tar.gz release/v0.1.0/checksums.txt
 ```
 
 #### Step 4.2: Verify Release
 
-Visit: https://github.com/acchapm1/ocmgr-app/releases/tag/v0.1.0
+Visit: https://github.com/acchapm1/ocmgr/releases/tag/v0.1.0
 
 ### Phase 5: Test the Release
 
 ```bash
 # Test install script
-curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
 
 # Verify version
 ocmgr --version
@@ -291,4 +291,4 @@ gh release delete v0.1.0 --yes
 - [ ] Test with a pre-release tag
   - `git tag v0.1.0-beta.1 && git push origin v0.1.0-beta.1`
   - Check the **Actions** tab in GitHub to watch the pipeline run
-  - Verify the release appears at `github.com/acchapm1/ocmgr-app/releases`
+  - Verify the release appears at `github.com/acchapm1/ocmgr/releases`

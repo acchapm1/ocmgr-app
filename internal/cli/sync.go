@@ -5,9 +5,9 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/acchapm1/ocmgr-app/internal/config"
-	"github.com/acchapm1/ocmgr-app/internal/github"
-	"github.com/acchapm1/ocmgr-app/internal/store"
+	"github.com/acchapm1/ocmgr/internal/config"
+	"github.com/acchapm1/ocmgr/internal/github"
+	"github.com/acchapm1/ocmgr/internal/store"
 	"github.com/spf13/cobra"
 )
 

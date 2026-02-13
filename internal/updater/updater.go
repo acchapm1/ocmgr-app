@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	githubAPIURL = "https://api.github.com/repos/acchapm1/ocmgr-app"
-	githubRepo   = "acchapm1/ocmgr-app"
+	githubAPIURL = "https://api.github.com/repos/acchapm1/ocmgr"
+	githubRepo   = "acchapm1/ocmgr"
 	binaryName   = "ocmgr"
 )
 
@@ -357,10 +357,10 @@ func GetUpdateInstructions(method string) string {
 	case "homebrew":
 		return "Run: brew upgrade ocmgr"
 	case "go":
-		return "Run: go install github.com/acchapm1/ocmgr-app/cmd/ocmgr@latest"
+		return "Run: go install github.com/acchapm1/ocmgr/cmd/ocmgr@latest"
 	case "curl":
 		return "Run: ocmgr update"
 	default:
-		return "Run: curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash"
+		return "Run: curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash"
 	}
 }

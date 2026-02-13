@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/acchapm1/ocmgr-app/internal/config"
-	"github.com/acchapm1/ocmgr-app/internal/copier"
-	"github.com/acchapm1/ocmgr-app/internal/profile"
+	"github.com/acchapm1/ocmgr/internal/config"
+	"github.com/acchapm1/ocmgr/internal/copier"
+	"github.com/acchapm1/ocmgr/internal/profile"
 )
 
 // cacheDir returns the path to the local sync cache (~/.ocmgr/.sync-cache).

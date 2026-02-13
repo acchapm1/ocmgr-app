@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/acchapm1/ocmgr-app/internal/updater"
+	"github.com/acchapm1/ocmgr/internal/updater"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ If a version is specified, update to that specific version:
 
 Note: This command only works for installations done via the curl
 installer. For Homebrew installations, use: brew upgrade ocmgr
-For Go installations, use: go install github.com/acchapm1/ocmgr-app/cmd/ocmgr@latest`,
+For Go installations, use: go install github.com/acchapm1/ocmgr/cmd/ocmgr@latest`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runUpdate,
 }
@@ -47,7 +47,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		fmt.Println("ocmgr was installed via 'go install'.")
 		fmt.Println()
 		fmt.Println("To update, run:")
-		fmt.Println("  go install github.com/acchapm1/ocmgr-app/cmd/ocmgr@latest")
+		fmt.Println("  go install github.com/acchapm1/ocmgr/cmd/ocmgr@latest")
 		return nil
 	}
 

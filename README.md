@@ -8,7 +8,7 @@
 
 ```bash
 # Install
-curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
 
 # First-time setup
 ocmgr config init
@@ -81,19 +81,19 @@ ocmgr profile export go /tmp/backup
 Tries a pre-built binary first, falls back to building from source. Detects OS/arch and checks for Go automatically:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
 ```
 
 The binary installs to `~/.local/bin` by default. Override with `INSTALL_DIR`:
 
 ```bash
-INSTALL_DIR=/usr/local/bin curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash
+INSTALL_DIR=/usr/local/bin curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash
 ```
 
 ### Homebrew
 
 ```bash
-brew tap acchapm1/ocmgr-app https://github.com/acchapm1/ocmgr-app
+brew tap acchapm1/ocmgr https://github.com/acchapm1/ocmgr
 brew install ocmgr
 ```
 
@@ -102,8 +102,8 @@ brew install ocmgr
 Requires Go 1.22+:
 
 ```bash
-git clone https://github.com/acchapm1/ocmgr-app.git
-cd ocmgr-app
+git clone https://github.com/acchapm1/ocmgr.git
+cd ocmgr
 make build
 # Binary at ./bin/ocmgr
 ```
@@ -262,7 +262,7 @@ extends = "base"    # Optional: parent profile resolved at init time
 ## Project Structure
 
 ```
-ocmgr-app/
+ocmgr/
 ├── cmd/ocmgr/main.go          # Entry point
 ├── internal/
 │   ├── cli/                    # Cobra command definitions

@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/acchapm1/ocmgr-app/internal/copier"
-	"github.com/acchapm1/ocmgr-app/internal/profile"
-	"github.com/acchapm1/ocmgr-app/internal/store"
+	"github.com/acchapm1/ocmgr/internal/copier"
+	"github.com/acchapm1/ocmgr/internal/profile"
+	"github.com/acchapm1/ocmgr/internal/store"
 	"github.com/spf13/cobra"
 )
 

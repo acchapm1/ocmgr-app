@@ -51,7 +51,7 @@ jobs:
           CGO_ENABLED: "0"
         run: |
           VERSION="${GITHUB_REF_NAME}"
-          MODULE="github.com/acchapm1/ocmgr-app"
+          MODULE="github.com/acchapm1/ocmgr"
           go build \
             -ldflags "-s -w -X ${MODULE}/internal/cli.Version=${VERSION}" \
             -o ocmgr \
@@ -111,7 +111,7 @@ jobs:
             echo "## Installation"
             echo ""
             echo '```bash'
-            echo 'curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr-app/main/install.sh | bash'
+            echo 'curl -sSL https://raw.githubusercontent.com/acchapm1/ocmgr/main/install.sh | bash'
             echo '```'
             echo ""
             echo "## Checksums"

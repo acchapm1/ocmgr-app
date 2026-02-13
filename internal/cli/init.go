@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/acchapm1/ocmgr-app/internal/configgen"
-	"github.com/acchapm1/ocmgr-app/internal/copier"
-	"github.com/acchapm1/ocmgr-app/internal/mcps"
-	"github.com/acchapm1/ocmgr-app/internal/plugins"
-	"github.com/acchapm1/ocmgr-app/internal/resolver"
-	"github.com/acchapm1/ocmgr-app/internal/store"
+	"github.com/acchapm1/ocmgr/internal/configgen"
+	"github.com/acchapm1/ocmgr/internal/copier"
+	"github.com/acchapm1/ocmgr/internal/mcps"
+	"github.com/acchapm1/ocmgr/internal/plugins"
+	"github.com/acchapm1/ocmgr/internal/resolver"
+	"github.com/acchapm1/ocmgr/internal/store"
 	"github.com/spf13/cobra"
 )
 

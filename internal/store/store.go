@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/acchapm1/ocmgr-app/internal/config"
-	"github.com/acchapm1/ocmgr-app/internal/profile"
+	"github.com/acchapm1/ocmgr/internal/config"
+	"github.com/acchapm1/ocmgr/internal/profile"
 )
 
 // Store provides access to locally stored profiles on disk.

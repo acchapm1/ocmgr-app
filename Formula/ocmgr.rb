@@ -1,35 +1,35 @@
 # Homebrew formula for ocmgr — OpenCode Profile Manager
 #
 # To use this formula as a tap:
-#   brew tap acchapm1/ocmgr-app https://github.com/acchapm1/ocmgr-app
+#   brew tap acchapm1/ocmgr https://github.com/acchapm1/ocmgr
 #   brew install ocmgr
 #
 # SHA256 values are updated by the release pipeline.
 
 class Ocmgr < Formula
   desc "Manage reusable .opencode profiles across projects"
-  homepage "https://github.com/acchapm1/ocmgr-app"
+  homepage "https://github.com/acchapm1/ocmgr"
   version "0.0.0"
   license "MIT"
 
   on_macos do
     on_arm do
-      url "https://github.com/acchapm1/ocmgr-app/releases/download/v#{version}/ocmgr_v#{version}_darwin_arm64.tar.gz"
+      url "https://github.com/acchapm1/ocmgr/releases/download/v#{version}/ocmgr_v#{version}_darwin_arm64.tar.gz"
       sha256 "PLACEHOLDER"
     end
     on_intel do
-      url "https://github.com/acchapm1/ocmgr-app/releases/download/v#{version}/ocmgr_v#{version}_darwin_amd64.tar.gz"
+      url "https://github.com/acchapm1/ocmgr/releases/download/v#{version}/ocmgr_v#{version}_darwin_amd64.tar.gz"
       sha256 "PLACEHOLDER"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/acchapm1/ocmgr-app/releases/download/v#{version}/ocmgr_v#{version}_linux_arm64.tar.gz"
+      url "https://github.com/acchapm1/ocmgr/releases/download/v#{version}/ocmgr_v#{version}_linux_arm64.tar.gz"
       sha256 "PLACEHOLDER"
     end
     on_intel do
-      url "https://github.com/acchapm1/ocmgr-app/releases/download/v#{version}/ocmgr_v#{version}_linux_amd64.tar.gz"
+      url "https://github.com/acchapm1/ocmgr/releases/download/v#{version}/ocmgr_v#{version}_linux_amd64.tar.gz"
       sha256 "PLACEHOLDER"
     end
   end
