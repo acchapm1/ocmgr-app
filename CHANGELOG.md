@@ -50,6 +50,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Safe binary replacement with backup/restore on failure
   - New package: `internal/updater/` for version checking and binary replacement
 
+- **Interactive TUI** (Phase 3 - IMPLEMENTED)
+  - `ocmgr` with no arguments launches full-screen TUI
+  - Main menu: Init, Profiles, Sync, Snapshot, Config
+  - Styled with lipgloss theme (violet/cyan color palette)
+  - Keyboard navigation with contextual help bar
+  - New package: `internal/tui/` with Charmbracelet Bubble Tea
+  - **Profile Browser**: Searchable/filterable profile list with detail view and file tree
+  - **Init Wizard**: Select profile → enter target dir → preview files → confirm and copy
+  - **Profile Editor**: Browse profile files, open in `$EDITOR`/nvim
+  - **Sync UI**: Visual sync status showing in-sync, modified, local-only, remote-only
+  - **Snapshot Wizard**: Name → source dir → metadata (description, tags) → preview → create
+
 ### Changed
 
 - **internal/copier/copier.go** - Removed opencode.json from copy process
@@ -77,6 +89,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Template `opencode.json` files from `~/.ocmgr/profiles/base/` and `~/.ocmgr/profiles/macos-base/`
   - No longer needed since `opencode.json` is now generated dynamically
+
+### Infrastructure
+
+- **Repository renamed** from `ocmgr-app` to `ocmgr`
+  - Updated `go.mod`, `Makefile`, `install.sh`
+  - Updated all GitHub URLs and references
+  - Updated GitHub Actions workflow
+  - Updated git remote URL
 
 ---
 

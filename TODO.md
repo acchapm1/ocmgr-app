@@ -152,39 +152,40 @@ A CLI (and eventually TUI) tool written in Go that manages `.opencode` directory
 - `github.com/charmbracelet/bubbles` — Common UI components (list, table, viewport, etc.)
 
 ### 3.1 — TUI Shell
-- [ ] `ocmgr` (no args) launches TUI
-- [ ] Main menu: Init, Profiles, Sync, Snapshot, Config
-- [ ] Styled with lipgloss theme (consistent color palette)
-- [ ] Keyboard navigation + help bar
+- [x] `ocmgr` (no args) launches TUI
+- [x] Main menu: Init, Profiles, Sync, Snapshot, Config
+- [x] Styled with lipgloss theme (consistent color palette)
+- [x] Keyboard navigation + help bar
 
 ### 3.2 — Profile Browser
-- [ ] Searchable/filterable profile list
-- [ ] Profile detail view with file tree preview
+- [x] Searchable/filterable profile list
+- [x] Profile detail view with file tree preview
 - [ ] Side-by-side profile comparison
 
 ### 3.3 — Init Wizard
-- [ ] Select profile(s) from list
-- [ ] Select target directory (default: current)
-- [ ] Preview changes (diff view)
+- [x] Select profile(s) from list
+- [x] Select target directory (default: current)
+- [x] Preview changes (dry-run file list)
+- [x] Confirm and apply with progress
 - [ ] Conflict resolution UI (overwrite/merge/compare/cancel per file)
-- [ ] Progress indicator during copy
 
 ### 3.4 — Profile Editor
-- [ ] Browse profile contents (agents, commands, skills, plugins)
-- [ ] Open files in `nvim` for editing
+- [x] Browse profile contents (agents, commands, skills, plugins)
+- [x] Open files in `$EDITOR`/`nvim` for editing
 - [ ] Add/remove files from a profile
 - [ ] Edit profile metadata via `huh` forms
 
 ### 3.5 — Sync UI
-- [ ] Visual sync status (local vs remote)
+- [x] Visual sync status (local vs remote)
 - [ ] Push/pull with progress
 - [ ] Diff viewer for conflicts
 
 ### 3.6 — Snapshot Wizard
-- [ ] Select source directory
-- [ ] Preview detected files by category
-- [ ] Fill metadata via `huh` form
-- [ ] Confirm and save
+- [x] Enter profile name with validation
+- [x] Select source directory
+- [x] Fill metadata (description, tags) with tab navigation
+- [x] Preview detected files by category
+- [x] Confirm and save
 
 ---
 
